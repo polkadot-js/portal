@@ -3,12 +3,10 @@
 
 import type { BountyIndex } from '@polkadot/types/interfaces';
 
-import BN from 'bn.js';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
-import { getTreasuryProposalThreshold } from '@polkadot/apps-config';
 import { InputAddress, Modal, TxButton } from '@polkadot/react-components';
-import { useApi, useMembers } from '@polkadot/react-hooks';
+import { useApi, useMembers, useThresholds } from '@polkadot/react-hooks';
 
 import { truncateTitle } from '../helpers';
 import { useBounties } from '../hooks';
@@ -25,14 +23,9 @@ function CloseBounty ({ description, index, toggleOpen }: Props): React.ReactEle
   const { api } = useApi();
   const { members } = useMembers();
   const { closeBounty } = useBounties();
-  const [accountId, setAccountId] = useState<string | null>(null);
-  const [threshold, setThreshold] = useState<BN>();
+  const { treasuryRejectionThreshold } = useThresholds();
 
-  useEffect((): void => {
-    members && setThreshold(
-      new BN(Math.ceil(members.length * getTreasuryProposalThreshold(api)))
-    );
-  }, [api, members]);
+  const [accountId, setAccountId] = useState<string | null>(null);
 
   const closeBountyProposal = useRef(closeBounty(index));
 
@@ -60,7 +53,7 @@ function CloseBounty ({ description, index, toggleOpen }: Props): React.ReactEle
           isDisabled={false}
           label={t<string>('Close Bounty')}
           onStart={toggleOpen}
-          params={[threshold, closeBountyProposal.current, closeBountyProposal.current.length]}
+          params={[treasuryRejectionThreshold, closeBountyProposal.current, closeBountyProposal.current.length]}
           tx={api.tx.council.propose}
         />
       </Modal.Actions>

@@ -6,9 +6,8 @@ import type { ProposalIndex } from '@polkadot/types/interfaces';
 
 import React, { useEffect, useRef, useState } from 'react';
 
-import { getTreasuryProposalThreshold } from '@polkadot/apps-config';
 import { Button, Dropdown, InputAddress, Modal, TxButton } from '@polkadot/react-components';
-import { useApi, useToggle } from '@polkadot/react-hooks';
+import { useApi, useThresholds, useToggle } from '@polkadot/react-hooks';
 
 import { useTranslation } from '../translate';
 
@@ -26,12 +25,13 @@ interface ProposalState {
 function Council ({ id, isDisabled, members }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const { api } = useApi();
+  const { treasuryProposalThreshold, treasuryRejectionThreshold } = useThresholds();
+
   const [isOpen, toggleOpen] = useToggle();
   const [accountId, setAccountId] = useState<string | null>(null);
   const [councilType, setCouncilType] = useState('accept');
   const [{ proposal, proposalLength }, setProposal] = useState<ProposalState>({ proposalLength: 0 });
-
-  const threshold = Math.ceil((members?.length || 0) * getTreasuryProposalThreshold(api));
+  const [threshold, setThreshold] = useState<number>(0);
 
   const councilTypeOptRef = useRef([
     { text: t<string>('Acceptance proposal to council'), value: 'accept' },
@@ -43,8 +43,13 @@ function Council ({ id, isDisabled, members }: Props): React.ReactElement<Props>
       ? api.tx.treasury.rejectProposal(id)
       : api.tx.treasury.approveProposal(id);
 
+    const threshold = councilType === 'reject'
+      ? treasuryRejectionThreshold
+      : treasuryProposalThreshold;
+
     setProposal({ proposal, proposalLength: proposal.length });
-  }, [api, councilType, id]);
+    setThreshold(threshold);
+  }, [api, councilType, id, treasuryProposalThreshold, treasuryRejectionThreshold]);
 
   return (
     <>

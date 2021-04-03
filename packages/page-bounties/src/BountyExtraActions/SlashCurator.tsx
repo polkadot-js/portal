@@ -3,13 +3,11 @@
 
 import type { AccountId, BountyIndex } from '@polkadot/types/interfaces';
 
-import BN from 'bn.js';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { getTreasuryProposalThreshold } from '@polkadot/apps-config';
 import { InputAddress, Modal, TxButton } from '@polkadot/react-components';
-import { useAccounts, useApi, useMembers } from '@polkadot/react-hooks';
+import { useAccounts, useApi, useMembers, useThresholds } from '@polkadot/react-hooks';
 
 import { truncateTitle } from '../helpers';
 import { useBounties } from '../hooks';
@@ -41,14 +39,8 @@ function SlashCurator ({ action, curatorId, description, index, toggleOpen }: Pr
   const { members } = useMembers();
   const { unassignCurator } = useBounties();
   const [accountId, setAccountId] = useState<string | null>(null);
-  const [threshold, setThreshold] = useState<BN>();
+  const { treasuryRejectionThreshold } = useThresholds();
   const { allAccounts } = useAccounts();
-
-  useEffect((): void => {
-    members && setThreshold(
-      new BN(Math.ceil(members.length * getTreasuryProposalThreshold(api)))
-    );
-  }, [api, members]);
 
   const unassignCuratorProposal = useMemo(() => unassignCurator(index), [index, unassignCurator]);
 
@@ -67,7 +59,7 @@ function SlashCurator ({ action, curatorId, description, index, toggleOpen }: Pr
       filter: members,
       header: t('This action will create a Council motion to slash the Curator.'),
       helpMessage: t('The Curator that will be slashed.'),
-      params: [threshold, unassignCuratorProposal, unassignCuratorProposal?.length],
+      params: [treasuryRejectionThreshold, unassignCuratorProposal, unassignCuratorProposal?.length],
       proposingAccountTip: t('The council member that will create the motion, submission equates to an "aye" vote.'),
       tip: t("If the motion is approved, Curator's deposit will be slashed and Curator will be unassigned. Bounty will return to the Funded state."),
       title: t('Slash curator'),
@@ -77,13 +69,13 @@ function SlashCurator ({ action, curatorId, description, index, toggleOpen }: Pr
       filter: members,
       header: t('This action will create a Council motion to unassign the Curator.'),
       helpMessage: t('The Curator that will be unassigned'),
-      params: [threshold, unassignCuratorProposal, unassignCuratorProposal?.length],
+      params: [treasuryRejectionThreshold, unassignCuratorProposal, unassignCuratorProposal?.length],
       proposingAccountTip: t('The council member that will create the motion, submission equates to an "aye" vote.'),
       tip: t('If the motion is approved, the current Curator will be unassigned and the Bounty will return to the Funded state.'),
       title: t('Unassign curator'),
       tx: api.tx.council.propose
     }
-  }), [t, index, unassignCurator, api.tx.council.propose, allAccounts, members, threshold, unassignCuratorProposal]);
+  }), [t, index, unassignCurator, api.tx.council.propose, allAccounts, members, treasuryRejectionThreshold, unassignCuratorProposal]);
 
   const { filter, helpMessage, params, proposingAccountTip, tip, title, tx } = actionProperties[action];
 

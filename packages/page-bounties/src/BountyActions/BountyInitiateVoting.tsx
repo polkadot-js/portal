@@ -4,12 +4,11 @@
 import type { DeriveCollectiveProposal } from '@polkadot/api-derive/types';
 import type { BountyIndex } from '@polkadot/types/interfaces';
 
-import BN from 'bn.js';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
-import { getTreasuryProposalThreshold } from '@polkadot/apps-config';
 import { Button, InputAddress, Modal, TxButton } from '@polkadot/react-components';
 import { useApi, useMembers, useToggle } from '@polkadot/react-hooks';
+import { useThresholds } from '@polkadot/react-hooks/useThresholds';
 
 import { truncateTitle } from '../helpers';
 import { useBounties } from '../hooks';
@@ -30,13 +29,7 @@ function BountyInitiateVoting ({ description, index, proposals }: Props): React.
   const { approveBounty, closeBounty } = useBounties();
   const [isOpen, toggleOpen] = useToggle();
   const [accountId, setAccountId] = useState<string | null>(null);
-  const [threshold, setThreshold] = useState<BN>();
-
-  useEffect((): void => {
-    members && setThreshold(
-      new BN(Math.ceil(members.length * getTreasuryProposalThreshold(api)))
-    );
-  }, [api, members]);
+  const { treasuryProposalThreshold } = useThresholds();
 
   const approveBountyProposal = useRef(approveBounty(index));
   const closeBountyProposal = useRef(closeBounty(index));
@@ -76,7 +69,7 @@ function BountyInitiateVoting ({ description, index, proposals }: Props): React.
                 isDisabled={false}
                 label={t<string>('Approve')}
                 onStart={toggleOpen}
-                params={[threshold, approveBountyProposal.current, approveBountyProposal.current.length]}
+                params={[treasuryProposalThreshold, approveBountyProposal.current, approveBountyProposal.current.length]}
                 tx={api.tx.council.propose}
               />
               <TxButton
@@ -85,7 +78,7 @@ function BountyInitiateVoting ({ description, index, proposals }: Props): React.
                 isDisabled={false}
                 label={t<string>('Reject')}
                 onStart={toggleOpen}
-                params={[threshold, closeBountyProposal.current, closeBountyProposal.current.length]}
+                params={[treasuryProposalThreshold, closeBountyProposal.current, closeBountyProposal.current.length]}
                 tx={api.tx.council.propose}
               />
             </Modal.Actions>

@@ -5,9 +5,8 @@ import type { SubmittableExtrinsic } from '@polkadot/api/types';
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { getSlashProposalThreshold } from '@polkadot/apps-config';
 import { Button, Dropdown, Input, InputAddress, Modal, TxButton } from '@polkadot/react-components';
-import { useApi, useAvailableSlashes, useToggle } from '@polkadot/react-hooks';
+import { useApi, useAvailableSlashes, useThresholds, useToggle } from '@polkadot/react-hooks';
 
 import { useTranslation } from '../translate';
 
@@ -30,13 +29,12 @@ interface ProposalState {
 function Slashing ({ className = '', isMember, members }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { api } = useApi();
+  const { slashProposalThreshold } = useThresholds();
   const slashes = useAvailableSlashes();
   const [isVisible, toggleVisible] = useToggle();
   const [accountId, setAcountId] = useState<string | null>(null);
   const [{ proposal, proposalLength }, setProposal] = useState<ProposalState>({ proposal: null, proposalLength: 0 });
   const [selectedEra, setSelectedEra] = useState(0);
-
-  const threshold = Math.ceil((members.length || 0) * getSlashProposalThreshold(api));
 
   const eras = useMemo(
     () => (slashes || []).map(([era, slashes]): Option => ({
@@ -113,13 +111,13 @@ function Slashing ({ className = '', isMember, members }: Props): React.ReactEle
             <TxButton
               accountId={accountId}
               icon='sync'
-              isDisabled={!threshold || !members.includes(accountId || '') || !proposal}
+              isDisabled={!slashProposalThreshold || !members.includes(accountId || '') || !proposal}
               label={t<string>('Revert')}
               onStart={toggleVisible}
               params={
                 api.tx.council.propose.meta.args.length === 3
-                  ? [threshold, proposal, proposalLength]
-                  : [threshold, proposal]
+                  ? [slashProposalThreshold, proposal, proposalLength]
+                  : [slashProposalThreshold, proposal]
               }
               tx={api.tx.council.propose}
             />
