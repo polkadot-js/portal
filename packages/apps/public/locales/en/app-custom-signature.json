@@ -1,0 +1,8 @@
+{
+  "Load account from MetaMask": "Load account from MetaMask",
+  "Send Transaction": "Send Transaction",
+  "Sign Transaction": "Sign Transaction",
+  "Submit the signed transaction to the chain.": "Submit the signed transaction to the chain.",
+  "Transaction Confirmation": "Transaction Confirmation",
+  "submit the following extrinsic": "submit the following extrinsic"
+}

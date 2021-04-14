@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@types/punycode": "^2.1.0",
+    "assert": "^2.0.0",
     "babel-loader": "^8.2.2",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^7.0.0",

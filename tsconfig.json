@@ -30,6 +30,8 @@
       "@polkadot/app-contracts/*": [ "packages/page-contracts/src/*" ],
       "@polkadot/app-council": [ "packages/page-council/src" ],
       "@polkadot/app-council/*": [ "packages/page-council/src/*" ],
+      "@polkadot/app-custom-signature": ["packages/page-custom-signature/src"],
+      "@polkadot/app-custom-signature/*": ["packages/page-custom-signature/src/*"],
       "@polkadot/app-democracy": [ "packages/page-democracy/src" ],
       "@polkadot/app-democracy/*": [ "packages/page-democracy/src/*" ],
       "@polkadot/app-extrinsics": [ "packages/page-extrinsics/src" ],

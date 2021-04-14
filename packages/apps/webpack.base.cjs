@@ -169,6 +169,7 @@ function createWebpack (context, mode = 'production') {
       },
       extensions: ['.js', '.jsx', '.mjs', '.ts', '.tsx'],
       fallback: {
+        assert: require.resolve('assert'),
         crypto: require.resolve('crypto-browserify'),
         path: require.resolve('path-browserify'),
         stream: require.resolve('stream-browserify')
