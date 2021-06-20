@@ -22,10 +22,10 @@ function isNewWinners (a: WinnerData[], b: WinnerData[]): boolean {
 
 function isNewOrdering (a: WinnerData[], b: WinnerData[]): boolean {
   return a.length !== b.length ||
-    a.some(({ firstSlot, lastSlot, paraId }, index) =>
+    a.some(({ firstPeriod, lastPeriod, paraId }, index) =>
       !paraId.eq(b[index].paraId) ||
-      !firstSlot.eq(b[index].firstSlot) ||
-      !lastSlot.eq(b[index].lastSlot)
+      !firstPeriod.eq(b[index].firstPeriod) ||
+      !lastPeriod.eq(b[index].lastPeriod)
     );
 }
 
@@ -40,10 +40,10 @@ function extractWinners (ranges: [number, number][], auctionInfo: AuctionInfo, o
 
         winners.push({
           accountId: accountId.toString(),
-          firstSlot: period.addn(first),
+          firstPeriod: period.addn(first),
           isCrowdloan: u8aEq(CROWD_PREFIX, accountId.subarray(0, CROWD_PREFIX.length)),
           key: paraId.toString(),
-          lastSlot: period.addn(last),
+          lastPeriod: period.addn(last),
           paraId,
           value
         });

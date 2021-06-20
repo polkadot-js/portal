@@ -23,8 +23,8 @@ interface Props {
 }
 
 interface Option {
-  firstSlot: number;
-  lastSlot: number;
+  firstPeriod: number;
+  lastPeriod: number;
   text: string;
   value: number;
 }
@@ -51,8 +51,8 @@ function Bid ({ auctionInfo, className, lastWinners, ownedIds }: Props): React.R
       const leasePeriod = auctionInfo.leasePeriod.toNumber();
 
       return ranges.map(([first, last], value): Option => ({
-        firstSlot: leasePeriod + first,
-        lastSlot: leasePeriod + last,
+        firstPeriod: leasePeriod + first,
+        lastPeriod: leasePeriod + last,
         text: `${formatNumber(leasePeriod + first)} - ${formatNumber(leasePeriod + last)}`,
         value
       }));
@@ -61,9 +61,9 @@ function Bid ({ auctionInfo, className, lastWinners, ownedIds }: Props): React.R
   );
 
   const currentWinner = useMemo(
-    () => lastWinners && lastWinners.winners.find(({ firstSlot, lastSlot }) =>
-      firstSlot.eqn(rangeOpts[range].firstSlot) &&
-      lastSlot.eqn(rangeOpts[range].lastSlot)
+    () => lastWinners && lastWinners.winners.find(({ firstPeriod, lastPeriod }) =>
+      firstPeriod.eqn(rangeOpts[range].firstPeriod) &&
+      lastPeriod.eqn(rangeOpts[range].lastPeriod)
     ),
     [lastWinners, range, rangeOpts]
   );

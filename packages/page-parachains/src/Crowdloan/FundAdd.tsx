@@ -31,14 +31,14 @@ function FundAdd ({ auctionInfo, bestNumber, className, leasePeriod, ownedIds }:
   const [{ accountId, paraId }, setOwnerInfo] = useState<OwnerInfo>(EMPTY_OWNER);
   const [cap, setCap] = useState<BN | undefined>();
   const [endBlock, setEndBlock] = useState<BN | undefined>();
-  const [firstSlot, setFirstSlot] = useState<BN | undefined>();
-  const [lastSlot, setLastSlot] = useState<BN | undefined>();
+  const [firstPeriod, setFirstPeriod] = useState<BN | undefined>();
+  const [lastPeriod, setLastPeriod] = useState<BN | undefined>();
   const [isOpen, toggleOpen] = useToggle();
 
   const maxPeriods = ranges[ranges.length - 1][1] - ranges[0][0];
   const isEndError = !bestNumber || !endBlock || endBlock.lt(bestNumber);
-  const isFirstError = !firstSlot || (!!leasePeriod && firstSlot.lt(leasePeriod.currentPeriod));
-  const isLastError = !lastSlot || !firstSlot || lastSlot.lt(firstSlot) || lastSlot.gt(firstSlot.addn(maxPeriods));
+  const isFirstError = !firstPeriod || (!!leasePeriod && firstPeriod.lt(leasePeriod.currentPeriod));
+  const isLastError = !lastPeriod || !firstPeriod || lastPeriod.lt(firstPeriod) || lastPeriod.gt(firstPeriod.addn(maxPeriods));
   const defaultSlot = (auctionInfo?.leasePeriod || leasePeriod?.currentPeriod.add(BN_ONE) || 1).toString();
 
   // TODO Add verifier
@@ -86,13 +86,13 @@ function FundAdd ({ auctionInfo, bestNumber, className, leasePeriod, ownedIds }:
                 defaultValue={defaultSlot}
                 isError={isFirstError}
                 label={t<string>('first period')}
-                onChange={setFirstSlot}
+                onChange={setFirstPeriod}
               />
               <InputNumber
                 defaultValue={defaultSlot}
                 isError={isLastError}
                 label={t<string>('last period')}
-                onChange={setLastSlot}
+                onChange={setLastPeriod}
               />
             </Modal.Columns>
           </Modal.Content>
@@ -103,7 +103,7 @@ function FundAdd ({ auctionInfo, bestNumber, className, leasePeriod, ownedIds }:
               isDisabled={!paraId || !cap?.gt(BN_ZERO) || isEndError || isFirstError || isLastError}
               label={t<string>('Add')}
               onStart={toggleOpen}
-              params={[paraId, cap, firstSlot, lastSlot, endBlock, null]}
+              params={[paraId, cap, firstPeriod, lastPeriod, endBlock, null]}
               tx={api.tx.crowdloan.create}
             />
           </Modal.Actions>

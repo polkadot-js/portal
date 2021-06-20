@@ -43,37 +43,37 @@ function Auction ({ auctionInfo, campaigns, className, winningData }: Props): Re
       const leasePeriod = auctionInfo.leasePeriod;
       const leasePeriodEnd = leasePeriod.add(rangeMax);
       const sorted = (campaigns.funds || [])
-        .filter(({ firstSlot, lastSlot, paraId }) =>
+        .filter(({ firstPeriod, lastPeriod, paraId }) =>
           newRaise.some((n) => n.eq(paraId)) &&
-          firstSlot.gte(leasePeriod) &&
-          lastSlot.lte(leasePeriodEnd)
+          firstPeriod.gte(leasePeriod) &&
+          lastPeriod.lte(leasePeriodEnd)
         )
         .sort((a, b) => b.value.cmp(a.value));
 
       return winners
-        .concat(...sorted.filter(({ firstSlot, lastSlot, paraId, value }) =>
+        .concat(...sorted.filter(({ firstPeriod, lastPeriod, paraId, value }) =>
           !winners.some((w) =>
-            w.firstSlot.eq(firstSlot) &&
-            w.lastSlot.eq(lastSlot)
+            w.firstPeriod.eq(firstPeriod) &&
+            w.lastPeriod.eq(lastPeriod)
           ) &&
           !sorted.some((e) =>
             !paraId.eq(e.paraId) &&
-            firstSlot.eq(e.firstSlot) &&
-            lastSlot.eq(e.lastSlot) &&
+            firstPeriod.eq(e.firstPeriod) &&
+            lastPeriod.eq(e.lastPeriod) &&
             value.lt(e.value)
           )
         ))
         .map((w): WinnerData =>
-          sorted.find(({ firstSlot, lastSlot, value }) =>
-            w.firstSlot.eq(firstSlot) &&
-            w.lastSlot.eq(lastSlot) &&
+          sorted.find(({ firstPeriod, lastPeriod, value }) =>
+            w.firstPeriod.eq(firstPeriod) &&
+            w.lastPeriod.eq(lastPeriod) &&
             w.value.lt(value)
           ) || w
         )
         .sort((a, b) =>
-          a.firstSlot.eq(b.firstSlot)
-            ? a.lastSlot.cmp(b.lastSlot)
-            : a.firstSlot.cmp(b.firstSlot)
+          a.firstPeriod.eq(b.firstPeriod)
+            ? a.lastPeriod.cmp(b.lastPeriod)
+            : a.firstPeriod.cmp(b.firstPeriod)
         );
     },
     [auctionInfo, campaigns, newRaise, rangeMax]

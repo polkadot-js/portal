@@ -86,10 +86,10 @@ export interface OwnerInfo {
 
 export interface WinnerData {
   accountId: string;
-  firstSlot: BN;
+  firstPeriod: BN;
   isCrowdloan: boolean;
   key: string;
-  lastSlot: BN;
+  lastPeriod: BN;
   paraId: ParaId;
   value: BN;
 }

@@ -130,11 +130,11 @@ const optFundMulti = {
       .map(([paraId, info]): Campaign => ({
         accountId: encodeAddress(createAddress(paraId)),
         childKey: createChildKey(info.trieIndex),
-        firstSlot: info.firstPeriod,
+        firstPeriod: info.firstPeriod,
         info,
         isCrowdloan: true,
         key: paraId.toString(),
-        lastSlot: info.lastPeriod,
+        lastPeriod: info.lastPeriod,
         paraId,
         value: info.raised
       }))

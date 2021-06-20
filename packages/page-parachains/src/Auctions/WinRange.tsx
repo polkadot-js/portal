@@ -21,7 +21,7 @@ interface Props {
   value: WinnerData;
 }
 
-function WinRanges ({ auctionInfo, blockNumber, className = '', isFirst, isLatest, value: { accountId, firstSlot, isCrowdloan, lastSlot, paraId, value } }: Props): React.ReactElement<Props> {
+function WinRanges ({ auctionInfo, blockNumber, className = '', isFirst, isLatest, value: { accountId, firstPeriod, isCrowdloan, lastPeriod, paraId, value } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   return (
@@ -39,9 +39,9 @@ function WinRanges ({ auctionInfo, blockNumber, className = '', isFirst, isLates
       <td className='address'><AddressMini value={accountId} /></td>
       <td className='all number'>{isCrowdloan ? t<string>('Yes') : t<string>('No')}</td>
       <td className='all number together'>
-        {firstSlot.eq(lastSlot)
-          ? formatNumber(firstSlot)
-          : `${formatNumber(firstSlot)} - ${formatNumber(lastSlot)}`
+        {firstPeriod.eq(lastPeriod)
+          ? formatNumber(firstPeriod)
+          : `${formatNumber(firstPeriod)} - ${formatNumber(lastPeriod)}`
         }
       </td>
       <td className='number'><FormatBalance value={value} /></td>
