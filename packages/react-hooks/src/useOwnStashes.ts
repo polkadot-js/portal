@@ -31,18 +31,18 @@ function getStashes (allAccounts: string[], ownBonded: Option<AccountId>[], ownL
 }
 
 export function useOwnStashes (): [string, IsInKeyring][] | undefined {
-  const { allAccounts, hasAccounts } = useAccounts();
+  const { allAccounts, areAccountsLoaded, hasAccounts } = useAccounts();
   const { api } = useApi();
   const ownBonded = useCall<Option<AccountId>[]>(hasAccounts && api.query.staking?.bonded.multi, [allAccounts]);
   const ownLedger = useCall<Option<StakingLedger>[]>(hasAccounts && api.query.staking?.ledger.multi, [allAccounts]);
 
   return useMemo(
-    () => hasAccounts
-      ? ownBonded && ownLedger
+    () => areAccountsLoaded && ownBonded && ownLedger
+      ? hasAccounts
         ? getStashes(allAccounts, ownBonded, ownLedger)
-        : undefined
-      : [],
-    [allAccounts, hasAccounts, ownBonded, ownLedger]
+        : []
+      : undefined,
+    [areAccountsLoaded, allAccounts, hasAccounts, ownBonded, ownLedger]
   );
 }
 

@@ -15,6 +15,11 @@ import { useApi } from './useApi';
 import { useIsMountedRef } from './useIsMountedRef';
 import { useOwnStashes } from './useOwnStashes';
 
+interface State {
+  ownStashes: StakerState[];
+  isLoadingStashes: boolean;
+}
+
 type ValidatorInfo = ITuple<[ValidatorPrefs, Codec]> | ValidatorPrefs;
 type Queried = Record<string, [boolean, DeriveStakingAccount, ValidatorInfo]>;
 
@@ -55,15 +60,18 @@ function getStakerState (stashId: string, allAccounts: string[], [isOwnStash, { 
   };
 }
 
-export function useOwnStashInfos (): StakerState[] | undefined {
+export function useOwnStashInfos (): State {
   const { api } = useApi();
   const { allAccounts } = useAccounts();
   const mountedRef = useIsMountedRef();
   const ownStashes = useOwnStashes();
   const [queried, setQueried] = useState<Queried | undefined>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect((): () => void => {
     let unsub: (() => void) | undefined;
+
+    setIsLoading(true);
 
     if (ownStashes) {
       if (ownStashes.length) {
@@ -80,10 +88,12 @@ export function useOwnStashInfos (): StakerState[] | undefined {
               [stashId]: [isOwnStash, accounts[index], validators[index]]
             }), {})
           );
+          setIsLoading(false);
         }).then((_unsub): void => {
           unsub = _unsub;
         }).catch(console.error);
       } else {
+        setIsLoading(false);
         mountedRef.current && setQueried({});
       }
     }
@@ -94,11 +104,16 @@ export function useOwnStashInfos (): StakerState[] | undefined {
   }, [api, mountedRef, ownStashes]);
 
   return useMemo(
-    () => ownStashes && queried && ownStashes.length === Object.keys(queried).length
-      ? ownStashes
-        .filter(([stashId]) => queried[stashId])
-        .map(([stashId]) => getStakerState(stashId, allAccounts, queried[stashId]))
-      : undefined,
-    [allAccounts, ownStashes, queried]
+    () => {
+      return {
+        isLoadingStashes: isLoading,
+        ownStashes: ownStashes && queried && ownStashes.length === Object.keys(queried).length
+          ? ownStashes
+            .filter(([stashId]) => queried[stashId])
+            .map(([stashId]) => getStakerState(stashId, allAccounts, queried[stashId]))
+          : []
+      };
+    },
+    [allAccounts, ownStashes, queried, isLoading]
   );
 }

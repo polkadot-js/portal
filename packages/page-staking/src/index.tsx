@@ -52,7 +52,7 @@ function StakingApp ({ basePath, className = '' }: Props): React.ReactElement<Pr
     api.query.session.validators,
     (api.query.parasShared || api.query.shared)?.activeValidatorIndices
   ], optionsParaValidators);
-  const ownStashes = useOwnStashInfos();
+  const { isLoadingStashes, ownStashes } = useOwnStashInfos();
   const slashes = useAvailableSlashes();
   const targets = useSortedTargets(favorites, withLedger);
 
@@ -62,8 +62,10 @@ function StakingApp ({ basePath, className = '' }: Props): React.ReactElement<Pr
   );
 
   const ownValidators = useMemo(
-    () => (ownStashes || []).filter(({ isStashValidating }) => isStashValidating),
-    [ownStashes]
+    () => isLoadingStashes
+      ? undefined
+      : (ownStashes || []).filter(({ isStashValidating }) => isStashValidating),
+    [isLoadingStashes, ownStashes]
   );
 
   const toggleLedger = useCallback(

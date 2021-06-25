@@ -7,7 +7,7 @@ import type { StakerState } from '@polkadot/react-hooks/types';
 import type { PayoutStash, PayoutValidator } from './types';
 
 import BN from 'bn.js';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { ApiPromise } from '@polkadot/api';
@@ -25,7 +25,7 @@ import Validator from './Validator';
 interface Props {
   className?: string;
   isInElection?: boolean;
-  ownValidators: StakerState[];
+  ownValidators?: StakerState[];
 }
 
 interface Available {
@@ -165,8 +165,14 @@ function getOptions (api: ApiPromise, eraLength: BN | undefined, historyDepth: B
 function Payouts ({ className = '', isInElection, ownValidators }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { api } = useApi();
-  const [hasOwnValidators] = useState(() => ownValidators.length !== 0);
+  const isLoadingValidators = useMemo(() => ownValidators === undefined, [ownValidators]);
+  const hasOwnValidators = useMemo(() => ownValidators && ownValidators.length !== 0, [ownValidators]);
   const [myStashesIndex, setMyStashesIndex] = useState(() => hasOwnValidators ? 0 : 1);
+
+  useEffect(() => {
+    setMyStashesIndex(hasOwnValidators ? 0 : 1);
+  }, [hasOwnValidators]);
+
   const [eraSelectionIndex, setEraSelectionIndex] = useState(0);
   const eraLength = useCall<BN>(api.derive.session.eraLength);
   const historyDepth = useCall<BN>(api.query.staking.historyDepth);
@@ -200,9 +206,9 @@ function Payouts ({ className = '', isInElection, ownValidators }: Props): React
   ]);
 
   const valOptions = useMemo(() => [
-    { isDisabled: !hasOwnValidators, text: t('My validators'), value: 'val' },
-    { text: t('My stashes'), value: 'all' }
-  ], [hasOwnValidators, t]);
+    { isDisabled: isLoadingRewards || isLoadingValidators || !hasOwnValidators, text: t('My validators'), value: 'val' },
+    { isDisabled: isLoadingRewards || isLoadingValidators, text: t('My stashes'), value: 'all' }
+  ], [isLoadingRewards, isLoadingValidators, hasOwnValidators, t]);
 
   const footerStash = useMemo(() => (
     <tr>
@@ -232,11 +238,11 @@ function Payouts ({ className = '', isInElection, ownValidators }: Props): React
           options={eraSelection}
           value={eraSelectionIndex}
         />
-        <ToggleGroup
+        {!isLoadingValidators && <ToggleGroup
           onChange={setMyStashesIndex}
           options={valOptions}
           value={myStashesIndex}
-        />
+        />}
         <PayButton
           isAll
           isDisabled={isInElection}
