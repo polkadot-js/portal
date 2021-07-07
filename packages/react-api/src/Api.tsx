@@ -5,6 +5,7 @@ import type BN from 'bn.js';
 import type { InjectedExtension } from '@polkadot/extension-inject/types';
 import type { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import type { KeyringStore } from '@polkadot/ui-keyring/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ApiProps, ApiState } from './types';
 
 import React, { useContext, useEffect, useMemo, useState } from 'react';
@@ -40,6 +41,7 @@ interface InjectedAccountExt {
     source: string;
     whenCreated: number;
   };
+  type: KeypairType
 }
 
 interface ChainData {
@@ -82,13 +84,14 @@ async function getInjectedAccounts (injectedPromise: Promise<InjectedExtension[]
 
     const accounts = await web3Accounts();
 
-    return accounts.map(({ address, meta }, whenCreated): InjectedAccountExt => ({
+    return accounts.map(({ address, meta, type }, whenCreated): InjectedAccountExt => ({
       address,
       meta: {
         ...meta,
         name: `${meta.name || 'unknown'} (${meta.source === 'polkadot-js' ? 'extension' : meta.source})`,
         whenCreated
-      }
+      },
+      type
     }));
   } catch (error) {
     console.error('web3Accounts', error);
