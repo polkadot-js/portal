@@ -14,18 +14,13 @@ function OpaqueCall ({ className = '', isDisabled, isError, label, onChange, onE
   const { apiDefaultTxSudo } = useApi();
 
   const _onChange = useCallback(
-    ({ isValid, value }: RawParam): void => {
-      let callData = null;
-
-      if (isValid && value) {
-        callData = (value as SubmittableExtrinsic<'promise'>).method.toHex();
-      }
-
+    ({ isValid, value }: RawParam) =>
       onChange && onChange({
         isValid,
-        value: callData
-      });
-    },
+        value: (isValid && value)
+          ? (value as SubmittableExtrinsic<'promise'>).method.toHex()
+          : null
+      }),
     [onChange]
   );
 

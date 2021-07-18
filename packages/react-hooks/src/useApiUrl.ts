@@ -9,8 +9,11 @@ import { isString } from '@polkadot/util';
 
 import { useIsMountedRef } from './useIsMountedRef';
 
-function disconnect (api: ApiPromise | null): void {
-  api && api.disconnect().catch(console.error);
+function disconnect (apiRef: React.MutableRefObject<ApiPromise | null>): void {
+  if (apiRef.current) {
+    apiRef.current.disconnect().catch(console.error);
+    apiRef.current = null;
+  }
 }
 
 export function useApiUrl (url?: string | string[]): ApiPromise | null {
@@ -20,14 +23,13 @@ export function useApiUrl (url?: string | string[]): ApiPromise | null {
 
   useEffect((): () => void => {
     return (): void => {
-      disconnect(apiRef.current);
-      apiRef.current = null;
+      disconnect(apiRef);
     };
   }, []);
 
   const _setApi = useCallback(
     (api: ApiPromise | null): void => {
-      disconnect(apiRef.current);
+      disconnect(apiRef);
 
       if (mountedRef.current) {
         apiRef.current = api;

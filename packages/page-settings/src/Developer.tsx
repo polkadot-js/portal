@@ -129,7 +129,7 @@ function Developer ({ className = '', onStatusChange }: Props): React.ReactEleme
 
   const _saveDeveloper = useCallback(
     (): void => {
-      let url = null;
+      let url: string | null = null;
 
       try {
         api.registerTypes(types);

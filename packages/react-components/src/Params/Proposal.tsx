@@ -13,18 +13,13 @@ function ProposalDisplay ({ className = '', isDisabled, isError, label, onChange
   const { api, apiDefaultTxSudo } = useApi();
 
   const _onChange = useCallback(
-    ({ isValid, value }: RawParam): void => {
-      let proposal = null;
-
-      if (isValid && value) {
-        proposal = api.createType('Proposal', value);
-      }
-
+    ({ isValid, value }: RawParam) =>
       onChange && onChange({
         isValid,
-        value: proposal
-      });
-    },
+        value: (isValid && value)
+          ? api.createType('Proposal', value)
+          : null
+      }),
     [api, onChange]
   );
 

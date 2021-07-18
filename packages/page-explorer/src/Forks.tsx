@@ -360,8 +360,10 @@ function Forks ({ className }: Props): React.ReactElement<Props> | null {
     let _subNewHead: UnsubFn | null = null;
 
     (async (): Promise<void> => {
-      _subFinHead = await api.rpc.chain.subscribeFinalizedHeads(_newFinalized);
-      _subNewHead = await api.rpc.chain.subscribeNewHeads(_newHeader);
+      [_subFinHead, _subNewHead] = await Promise.all([
+        api.rpc.chain.subscribeFinalizedHeads(_newFinalized),
+        api.rpc.chain.subscribeNewHeads(_newHeader)
+      ]);
     })().catch(console.error);
 
     return (): void => {
