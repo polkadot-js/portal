@@ -8,7 +8,7 @@ import type { Ledger } from '@polkadot/hw-ledger';
 import type { ActionStatus } from '@polkadot/react-components/Status/types';
 import type { ThemeDef } from '@polkadot/react-components/types';
 import type { Option } from '@polkadot/types';
-import type { ProxyDefinition, RecoveryConfig } from '@polkadot/types/interfaces';
+import type { ProxyDefinition, RecoveryConfig, Voting } from '@polkadot/types/interfaces';
 import type { KeyringAddress, KeyringJson$Meta } from '@polkadot/ui-keyring/types';
 import type { Delegation } from '../types';
 
@@ -96,6 +96,7 @@ function Account ({ account: { address, meta }, className = '', delegation, filt
   const balancesAll = useCall<DeriveBalancesAll>(api.api.derive.balances?.all, [address]);
   const democracyLocks = useCall<DeriveDemocracyLock[]>(api.api.derive.democracy?.locks, [address]);
   const recoveryInfo = useCall<RecoveryConfig | null>(api.api.query.recovery?.recoverable, [address], transformRecovery);
+  const votingOf = useCall<Voting>(api.api.query.democracy?.votingOf, [address]);
   const multiInfos = useMultisigApprovals(address);
   const proxyInfo = useProxies(address);
   const { flags: { isDevelopment, isEditable, isExternal, isHardware, isInjected, isMultisig, isProxied }, genesisHash, identity, name: accName, onSetGenesisHash, tags } = useAccountInfo(address);
@@ -129,23 +130,51 @@ function Account ({ account: { address, meta }, className = '', delegation, filt
   }, [address, api, balancesAll, setBalance]);
 
   useEffect((): void => {
-    bestNumber && democracyLocks && setUnlockableIds(
-      (prev): DemocracyUnlockable => {
+    if (bestNumber) {
+      if (democracyLocks && democracyLocks.length) {
+        // referendum locks
         const ids = democracyLocks
           .filter(({ isFinished, unlockAt }) => isFinished && bestNumber.gt(unlockAt))
           .map(({ referendumId }) => referendumId);
 
-        if (JSON.stringify(prev.ids) === JSON.stringify(ids)) {
-          return prev;
+        if (ids.length) {
+          return setUnlockableIds((prev) =>
+            (JSON.stringify(prev.ids) !== JSON.stringify(ids))
+              ? {
+                democracyUnlockTx: createClearDemocracyTx(api.api, address, ids),
+                ids
+              }
+              : prev
+          );
         }
-
-        return {
-          democracyUnlockTx: createClearDemocracyTx(api.api, address, ids),
-          ids
-        };
       }
-    );
-  }, [address, api, bestNumber, democracyLocks]);
+
+      if (votingOf && votingOf.isDirect) {
+        // delegations removed
+        const { prior: [unlockAt, balance] } = votingOf.asDirect;
+
+        if (balance.gt(BN_ZERO) && unlockAt.gt(BN_ZERO) && bestNumber.gt(unlockAt)) {
+          return setUnlockableIds((prev) =>
+            prev.ids.length !== 0 || !prev.democracyUnlockTx
+              ? {
+                democracyUnlockTx: api.api.tx.democracy.unlock(address),
+                ids: []
+              }
+              : prev
+          );
+        }
+      }
+
+      setUnlockableIds((prev) =>
+        prev.democracyUnlockTx
+          ? {
+            democracyUnlockTx: null,
+            ids: []
+          }
+          : prev
+      );
+    }
+  }, [address, api, bestNumber, democracyLocks, votingOf]);
 
   const isVisible = useMemo(
     () => calcVisible(filter, accName, tags),
