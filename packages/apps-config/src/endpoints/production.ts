@@ -49,6 +49,13 @@ export function createProduction (t: TFunction, firstOnly?: boolean): LinkOption
       }
     },
     {
+      info: 'crown-sterling',
+      text: t('rpc.prod.crown-sterling', 'Crown Sterling', { ns: 'apps-config' }),
+      providers: {
+        'Crown Sterling Limited LLC': 'wss://blockchain.crownsterling.io'
+      }
+    },
+    {
       info: 'dock-mainnet',
       text: t('rpc.prod.dock-mainnet', 'Dock', { ns: 'apps-config' }),
       providers: {

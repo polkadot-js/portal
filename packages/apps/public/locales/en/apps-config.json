@@ -45,6 +45,7 @@
   "rpc.prod.centrifuge": "Centrifuge",
   "rpc.prod.chainx": "ChainX",
   "rpc.prod.crab": "Darwinia Crab",
+  "rpc.prod.crown-sovereign": "Crown Sovereign",
   "rpc.prod.darwinia": "Darwinia",
   "rpc.prod.dock-mainnet": "Dock",
   "rpc.prod.edgeware": "Edgeware",

@@ -1296,6 +1296,7 @@
   "rpc.chainx": "ChainX",
   "rpc.clover.finance": "Clover",
   "rpc.crab": "Darwinia Crab",
+  "rpc.crown-sovereign": "Crown Sovereign",
   "rpc.crust.network": "Crust Maxwell",
   "rpc.custom": "Environment personnalisé",
   "rpc.custom.entry": "Personalisé {{WS_URL}}",
