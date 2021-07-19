@@ -1,6 +1,7 @@
 // Copyright 2017-2021 @polkadot/app-accounts authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { Dispatch, SetStateAction } from 'react';
 import type { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import type { ActionStatus } from '@polkadot/react-components/Status/types';
 import type { ModalProps } from '../types';
@@ -28,11 +29,16 @@ interface PassState {
 
 const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 
-function parseFile (file: Uint8Array, genesisHash?: string | null): KeyringPair | null {
+function parseFile (file: Uint8Array, setWarning: Dispatch<SetStateAction<string | null>>, isEthereum: boolean, genesisHash?: string | null): KeyringPair | null {
   try {
-    return keyring.createFromJson(JSON.parse(u8aToString(file)) as KeyringPair$Json, { genesisHash });
+    const pair = keyring.createFromJson(JSON.parse(u8aToString(file)) as KeyringPair$Json, { genesisHash });
+
+    if (isEthereum && pair.type !== 'ethereum') { throw new Error('JSON File does not contain an ethereum type key pair'); }
+
+    return pair;
   } catch (error) {
     console.error(error);
+    setWarning((error as Error).message ? (error as Error).message : (error as Error).toString());
   }
 
   return null;
@@ -40,16 +46,17 @@ function parseFile (file: Uint8Array, genesisHash?: string | null): KeyringPair 
 
 function Import ({ className = '', onClose, onStatusChange }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { api, isDevelopment } = useApi();
+  const { api, isDevelopment, isEthereum } = useApi();
   const [isBusy, setIsBusy] = useState(false);
   const [pair, setPair] = useState<KeyringPair | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [{ isPassValid, password }, setPass] = useState<PassState>({ isPassValid: false, password: '' });
   const apiGenesisHash = useMemo(() => isDevelopment ? null : api.genesisHash.toHex(), [api, isDevelopment]);
   const differentGenesis = useMemo(() => pair?.meta.genesisHash && pair.meta.genesisHash !== apiGenesisHash, [apiGenesisHash, pair]);
 
   const _onChangeFile = useCallback(
-    (file: Uint8Array) => setPair(parseFile(file, apiGenesisHash)),
-    [apiGenesisHash]
+    (file: Uint8Array) => setPair(parseFile(file, setWarning, isEthereum, apiGenesisHash)),
+    [apiGenesisHash, isEthereum]
   );
 
   const _onChangePass = useCallback(
@@ -136,6 +143,7 @@ function Import ({ className = '', onClose, onStatusChange }: Props): React.Reac
         </Modal.Columns>
         <Modal.Columns>
           <ExternalWarning />
+          {warning && <MarkWarning content={warning} />}
         </Modal.Columns>
       </Modal.Content>
       <Modal.Actions onCancel={onClose}>
